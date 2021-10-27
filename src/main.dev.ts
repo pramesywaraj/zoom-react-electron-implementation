@@ -11,10 +11,124 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
+
+const os = require('os');
+
+const platform = os.platform();
+const arch = os.arch();
+
+// Electron initialization
+const {
+  ZOOM_TYPE_OS_TYPE,
+  ZoomSDK_LANGUAGE_ID,
+  ZoomSDKError,
+  ZoomAuthResult,
+  ZoomLoginStatus,
+  ZoomMeetingStatus,
+  ZoomMeetingUIFloatVideoType,
+  SDKCustomizedStringType,
+  SDKCustomizedURLType,
+  ZoomAPPLocale,
+} = require('../lib/settings.js');
+
+try {
+  require('../lib/electron_sdk_pb.js');
+} catch (error) {
+  console.log(
+    'Please execute npm install google-protobuf at root of the project \nRefer to README.md'
+  );
+  app.exit();
+}
+
+const ZOOMSDKMOD = require('../lib/zoom_sdk.js');
+
+const ZOOM_API_KEY = 'g8FwPBnJ22Las2WYV5d2gRQBG66yYt85FAeX';
+const ZOOM_API_SECRET = '3nNJcsR4fACjW9SMuABxMheqJCF0N8uWWQoN';
+
+let zoomsdk = null;
+let zoomauth = null;
+let zoommeeting;
+let zoomparticipantsctrl;
+let zoomrawdata;
+let hasRDLicense;
+
+// Zoom SDK init callback functions
+function hasRawDataLicense() {
+  const ret = zoomrawdata.HasRawDataLicense();
+  return ret;
+}
+
+function sdkauthCB(status) {
+  console.log('CHECK SDK AUTH CALLBACK', status);
+  if (ZoomAuthResult.AUTHRET_SUCCESS == status) {
+    const opts = {
+      meetingstatuscb: (status, result) => {
+        console.log('check meeting status and result', status, result);
+        if (status === ZoomMeetingStatus.MEETING_STATUS_ENDED) {
+          // browserWindowInstance.webContents.send('ZOOM_MEETING_END');
+        }
+      },
+      meetinguserjoincb: () => console.log('user joined the meeting'),
+      meetinguserleftcb: () => console.log('USER LEFT THE MEETING'),
+      meetinghostchangecb: () => console.log('meeting host change'),
+    };
+    zoommeeting = zoomsdk.GetMeeting(opts);
+    app.zoommeeting = zoommeeting;
+    zoomparticipantsctrl = zoommeeting.GetMeetingParticipantsCtrl(opts);
+    app.zoomparticipantsctrl = zoomparticipantsctrl;
+    zoomrawdata = zoomsdk.RawData();
+    hasRDLicense = hasRawDataLicense();
+    global.hasRDLicense = hasRDLicense;
+    app.zoomrawdata = zoomrawdata;
+  }
+}
+
+function apicallresultcb(apiname, ret) {
+  if (apiname === 'InitSDK' && ZoomSDKError.SDKERR_SUCCESS === ret) {
+    console.log('SDK IS READY');
+  } else if (apiname === 'CleanUPSDK') {
+    app.quit();
+  }
+}
+
+const initoptions = {
+  apicallretcb: apicallresultcb,
+  ostype: ZOOM_TYPE_OS_TYPE.MAC_OS,
+  path:
+    platform === 'darwin'
+      ? './../sdk/mac/'
+      : arch === 'x64'
+      ? './../sdk/win64/'
+      : './../sdk/win32/',
+};
+
+zoomsdk = ZOOMSDKMOD.ZoomSDK.getInstance(initoptions);
+
+console.log("CHECK ZOOM SDK VERSION", zoomsdk.GetZoomSDKVersion());
+
+const ret = zoomsdk.InitSDK();
+if (ZoomSDKError.SDKERR_SUCCESS === ret) {
+  const options = {
+    authcb: (status) => sdkauthCB(status),
+    logincb: null,
+    logoutcb: null,
+  };
+  // AUTH APP
+  zoomauth = zoomsdk.GetAuth(options);
+  global.zoomauth = zoomauth;
+
+  const sdkAuthResult = zoomauth.SDKAuth(ZOOM_API_KEY, ZOOM_API_SECRET);
+  console.log('CHECK SDK AUTH VALUE', sdkAuthResult);
+  if (sdkAuthResult === 0) {
+    // IF APP IS AUTHORIZED - CREATE MAIN WINDOW
+    console.log('ZOOM SDK AUTHORIZED');
+  }
+}
+// Zoom SDK init callback functions
 
 export default class AppUpdater {
   constructor() {
@@ -129,4 +243,13 @@ app.on('activate', () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (mainWindow === null) createWindow();
+});
+
+ipcMain.on('JOIN_MEETING', async (event, optionObj) => {
+  console.log('CHECK OPTION Obj', optionObj);
+  const joinMeetingResultStatus = await zoommeeting.JoinMeetingWithoutLogin(
+    optionObj
+  );
+
+  console.log('CHECK', joinMeetingResultStatus);
 });

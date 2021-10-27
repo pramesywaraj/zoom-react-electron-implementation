@@ -13,7 +13,8 @@
     "start": "node -r @babel/register ./.erb/scripts/CheckPortInUse.js && cross-env yarn start:renderer",
     "start:main": "cross-env NODE_ENV=development electron -r ./.erb/scripts/BabelRegister ./src/main.dev.ts",
     "start:renderer": "cross-env NODE_ENV=development webpack serve --config ./.erb/configs/webpack.config.renderer.dev.babel.js",
-    "test": "jest"
+    "test": "jest",
+    "build-zoom-mac": "yes|cp -R  -H ./sdk/mac/Plugins ./node_modules/electron/dist/Electron.app/Contents/ && yes|cp -R  -H ./sdk/mac/ZoomSDK/ ./node_modules/electron/dist/Electron.app/Contents/Frameworks && yes|cp -R  -H ./sdk/mac/libprotobuf-lite.24.dylib ./node_modules/electron/dist/Electron.app/Contents/Frameworks"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -49,7 +50,28 @@
       "hardenedRuntime": true,
       "entitlements": "assets/entitlements.mac.plist",
       "entitlementsInherit": "assets/entitlements.mac.plist",
-      "gatekeeperAssess": false
+      "gatekeeperAssess": false,
+      "extraResources": [
+        {
+          "from": "./sdk/mac/ZoomSDK/",
+          "to": "../Frameworks/"
+        },
+        {
+          "from": "./sdk/mac/libprotobuf-lite.24.dylib",
+          "to": "../Frameworks/libprotobuf-lite.24.dylib"
+        },
+        {
+          "from": "./sdk/mac/",
+          "to": "./sdk/mac/",
+          "filter": [
+            "*.node"
+          ]
+        }
+      ],
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Please allow this program to access your microphone",
+        "NSCameraUsageDescription": "Please allow this program to access your camera"
+      }
     },
     "dmg": {
       "contents": [
@@ -66,6 +88,16 @@
       ]
     },
     "win": {
+      "extraResources": [
+        {
+          "from": "./sdk/win32",
+          "to": "./sdk/win32/"
+        },
+        {
+          "from": "./sdk/win64",
+          "to": "./sdk/win64/"
+        }
+      ],
       "target": [
         "nsis"
       ]
@@ -82,12 +114,31 @@
       "output": "release"
     },
     "extraResources": [
-      "./assets/**"
+      "./assets/**",
+      {
+        "from": "./lib",
+        "to": "./lib/",
+        "filter": [
+          "!**/node_add_on"
+        ]
+      },
+      {
+        "from": "./node_modules/google-protobuf/",
+        "to": "./node_modules/google-protobuf/"
+      }
     ],
     "publish": {
       "provider": "github",
       "owner": "electron-react-boilerplate",
       "repo": "electron-react-boilerplate"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": true
     }
   },
   "repository": {
@@ -201,7 +252,7 @@
     "css-loader": "^5.0.1",
     "css-minimizer-webpack-plugin": "^1.1.5",
     "detect-port": "^1.3.0",
-    "electron": "^11.0.1",
+    "electron": "^11.5.0",
     "electron-builder": "^22.3.6",
     "electron-devtools-installer": "^3.1.1",
     "electron-notarize": "^1.0.0",
@@ -251,6 +302,7 @@
     "electron-debug": "^3.1.0",
     "electron-log": "^4.2.4",
     "electron-updater": "^4.3.4",
+    "google-protobuf": "3.13.0",
     "history": "^5.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

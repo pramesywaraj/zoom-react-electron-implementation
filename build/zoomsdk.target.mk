@@ -12,9 +12,6 @@ DEFS_Debug := \
 	'-D_DARWIN_USE_64_BIT_INODE=1' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
-	'-DV8_COMPRESS_POINTERS' \
-	'-DV8_31BIT_SMIS_ON_64BIT_ARCH' \
-	'-DV8_REVERSE_JSARGS' \
 	'-DOPENSSL_NO_PINSHARED' \
 	'-DOPENSSL_THREADS' \
 	'-DBUILDING_NODE_EXTENSION' \
@@ -26,7 +23,7 @@ DEFS_Debug := \
 CFLAGS_Debug := \
 	-O0 \
 	-gdwarf-2 \
-	-mmacosx-version-min=10.10 \
+	-mmacosx-version-min=10.13 \
 	-arch x86_64 \
 	-Wall \
 	-Wendif-labels \
@@ -57,13 +54,14 @@ CFLAGS_OBJC_Debug :=
 CFLAGS_OBJCC_Debug :=
 
 INCS_Debug := \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/include/node \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/src \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/openssl/config \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/openssl/openssl/include \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/uv/include \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/zlib \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/v8/include \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/include/node \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/src \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/openssl/config \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/openssl/openssl/include \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/uv/include \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/zlib \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/v8/include \
+	-I$(srcdir)/lib/node_add_on \
 	-I$(srcdir)/lib/node_add_on/protobuf_src
 
 DEFS_Release := \
@@ -76,9 +74,6 @@ DEFS_Release := \
 	'-D_DARWIN_USE_64_BIT_INODE=1' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
-	'-DV8_COMPRESS_POINTERS' \
-	'-DV8_31BIT_SMIS_ON_64BIT_ARCH' \
-	'-DV8_REVERSE_JSARGS' \
 	'-DOPENSSL_NO_PINSHARED' \
 	'-DOPENSSL_THREADS' \
 	'-DBUILDING_NODE_EXTENSION'
@@ -87,7 +82,7 @@ DEFS_Release := \
 CFLAGS_Release := \
 	-O3 \
 	-gdwarf-2 \
-	-mmacosx-version-min=10.10 \
+	-mmacosx-version-min=10.13 \
 	-arch x86_64 \
 	-Wall \
 	-Wendif-labels \
@@ -118,13 +113,14 @@ CFLAGS_OBJC_Release :=
 CFLAGS_OBJCC_Release :=
 
 INCS_Release := \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/include/node \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/src \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/openssl/config \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/openssl/openssl/include \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/uv/include \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/zlib \
-	-I/Users/pfy-pramesme/Library/Caches/node-gyp/11.0.1/deps/v8/include \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/include/node \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/src \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/openssl/config \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/openssl/openssl/include \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/uv/include \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/zlib \
+	-I/Users/pfy-pramesme/Library/Caches/node-gyp/14.15.4/deps/v8/include \
+	-I$(srcdir)/lib/node_add_on \
 	-I$(srcdir)/lib/node_add_on/protobuf_src
 
 OBJS := \
@@ -159,6 +155,7 @@ OBJS := \
 	$(obj).target/$(TARGET)/lib/node_add_on/mac/rawdata_api_wrap_core.o \
 	$(obj).target/$(TARGET)/lib/node_add_on/mac/rawdataDelegate.o \
 	$(obj).target/$(TARGET)/lib/node_add_on/mac/setting_shareScreen_service.o \
+	$(obj).target/$(TARGET)/lib/node_add_on/mac/meeting_appSignal_service.o \
 	$(obj).target/$(TARGET)/lib/node_add_on/zoom_node_setting_share_ctrl.o \
 	$(obj).target/$(TARGET)/lib/node_add_on/zoom_node_rawdata_api_ctrl.o \
 	$(obj).target/$(TARGET)/lib/node_add_on/zoom_node_rawdata_helper_mgr_class.o \
@@ -185,7 +182,8 @@ OBJS := \
 	$(obj).target/$(TARGET)/lib/node_add_on/zoom_v8_to_c.o \
 	$(obj).target/$(TARGET)/lib/node_add_on/run_task_to_main_thread.o \
 	$(obj).target/$(TARGET)/lib/node_add_on/zoom_node_setting_ui_strategy_ctrl.o \
-	$(obj).target/$(TARGET)/lib/node_add_on/zoom_node_sdk_sms_helper.o
+	$(obj).target/$(TARGET)/lib/node_add_on/zoom_node_sdk_sms_helper.o \
+	$(obj).target/$(TARGET)/lib/node_add_on/zoom_node_meeting_AAN_ctrl.o
 
 # Add to the list of files we specially track dependencies for.
 all_deps += $(OBJS)
@@ -236,7 +234,7 @@ LDFLAGS_Debug := \
 	-undefined dynamic_lookup \
 	-Wl,-no_pie \
 	-Wl,-search_paths_first \
-	-mmacosx-version-min=10.10 \
+	-mmacosx-version-min=10.13 \
 	-arch x86_64 \
 	-L$(builddir) \
 	-F./../sdk/mac/ZoomSDK \
@@ -253,7 +251,7 @@ LDFLAGS_Release := \
 	-undefined dynamic_lookup \
 	-Wl,-no_pie \
 	-Wl,-search_paths_first \
-	-mmacosx-version-min=10.10 \
+	-mmacosx-version-min=10.13 \
 	-arch x86_64 \
 	-L$(builddir) \
 	-F./../sdk/mac/ZoomSDK \
